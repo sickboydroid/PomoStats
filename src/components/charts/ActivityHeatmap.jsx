@@ -11,11 +11,11 @@ export default function ActivityHeatmap({ data }) {
   const firstDate = new Date(dates[0]);
   const lastDate = new Date(dates[dates.length - 1]);
   
-  // Make sure we start on a Sunday
+  // Start on a Sunday
   const startDate = new Date(firstDate);
   startDate.setDate(startDate.getDate() - startDate.getDay());
 
-  // Make sure we end on a Saturday
+  // End on a Saturday
   const endDate = new Date(lastDate);
   endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
 
@@ -40,15 +40,6 @@ export default function ActivityHeatmap({ data }) {
     return `rgba(0, 240, 255, ${alpha})`;
   };
 
-  // Extract month labels. Only add a month label if the first day of the week is the ~start of the month
-  const monthLabels = [];
-  weeks.forEach((week, index) => {
-    const firstDay = week[0].date;
-    if (firstDay.getDate() <= 7) {
-      monthLabels.push({ index, label: firstDay.toLocaleString('default', { month: 'short' }) });
-    }
-  });
-
   // Scroll to the far right on mount (most recent data)
   useEffect(() => {
     if (scrollRef.current) {
@@ -56,10 +47,88 @@ export default function ActivityHeatmap({ data }) {
     }
   }, [data]);
 
+  const monthLabels = [];
+  const yearLabels = [];
+
+  let currentOffset = 0;
+  
+  // Calculate gaps and label positions
+  const renderWeeks = weeks.map((week, wIdx) => {
+    const thurs = week[3].date; // Thursday determines the week's month/year
+    const currentMonth = thurs.getMonth();
+    const currentYear = thurs.getFullYear();
+
+    let marginRight = 4; // Default gap between weeks
+    let isYearChange = false;
+    let isMonthChange = false;
+
+    if (wIdx < weeks.length - 1) {
+      const nextThurs = weeks[wIdx + 1][3].date;
+      if (nextThurs.getFullYear() !== currentYear) {
+        marginRight = 32; // Large gap for year
+        isYearChange = true;
+      } else if (nextThurs.getMonth() !== currentMonth) {
+        marginRight = 16; // Medium gap for month
+        isMonthChange = true;
+      }
+    }
+
+    // Add Labels
+    if (wIdx === 0 || isMonthChange || isYearChange) {
+      // Find the first day in this week that belongs to the new month
+      const firstDayOfMonth = week.find(d => d.date.getDate() <= 7);
+      if (firstDayOfMonth || wIdx === 0) {
+        monthLabels.push({
+          offset: currentOffset,
+          label: (firstDayOfMonth ? firstDayOfMonth.date : thurs).toLocaleString('default', { month: 'short' })
+        });
+      }
+      
+      if (wIdx === 0 || isYearChange) {
+        yearLabels.push({
+          offset: currentOffset,
+          label: currentYear.toString()
+        });
+      }
+    }
+
+    const weekWidth = 12 + marginRight; // 12px width + margin
+    const colOffset = currentOffset;
+    currentOffset += weekWidth;
+
+    return (
+      <div key={wIdx} style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginRight: `${marginRight}px` }}>
+        {week.map((day, dIdx) => (
+          <div
+            key={dIdx}
+            title={`${day.dateKey}: ${(day.minutes / 60).toFixed(1)} hrs`}
+            style={{
+              width: '12px',
+              height: '12px',
+              backgroundColor: getColor(day.minutes),
+              borderRadius: '2px',
+              border: '1px solid var(--border-color)',
+              transition: 'transform 0.2s',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'scale(1.5)';
+              e.target.style.zIndex = 10;
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'scale(1)';
+              e.target.style.zIndex = 1;
+            }}
+          />
+        ))}
+      </div>
+    );
+  });
+
   return (
     <div className="card w-full animate-slide-up">
-      <h3 style={{ marginBottom: '0.5rem' }}>All-Time Activity Heatmap</h3>
-      <p className="text-muted text-sm mb-4">Scroll horizontally to view your entire history.</p>
+      <h3 style={{ marginBottom: '0.25rem' }}>All-Time Activity Heatmap</h3>
+      <p className="text-muted text-sm mb-4">Historical view of your focused hours.</p>
 
       <div 
         ref={scrollRef}
@@ -73,14 +142,35 @@ export default function ActivityHeatmap({ data }) {
         }}
         className="heatmap-scroll-container"
       >
-        {/* Month Labels */}
-        <div style={{ display: 'flex', position: 'relative', height: '20px', minWidth: `${weeks.length * 16}px` }}>
-          {monthLabels.map((m, i) => (
+        {/* Year Labels */}
+        <div style={{ display: 'flex', position: 'relative', height: '16px', minWidth: `${currentOffset}px` }}>
+          {yearLabels.map((y, i) => (
             <span 
-              key={i} 
+              key={`y-${i}`} 
               style={{ 
                 position: 'absolute', 
-                left: `${m.index * 16}px`,
+                left: `${y.offset}px`,
+                fontSize: '11px',
+                fontWeight: 'bold',
+                color: 'var(--text-main)',
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                padding: '0 4px',
+                borderRadius: '4px'
+              }}
+            >
+              {y.label}
+            </span>
+          ))}
+        </div>
+
+        {/* Month Labels */}
+        <div style={{ display: 'flex', position: 'relative', height: '20px', minWidth: `${currentOffset}px` }}>
+          {monthLabels.map((m, i) => (
+            <span 
+              key={`m-${i}`} 
+              style={{ 
+                position: 'absolute', 
+                left: `${m.offset}px`,
                 fontSize: '12px',
                 color: 'var(--text-muted)'
               }}
@@ -91,34 +181,8 @@ export default function ActivityHeatmap({ data }) {
         </div>
 
         {/* Heatmap Grid */}
-        <div style={{ display: 'flex', gap: '4px' }}>
-          {weeks.map((week, wIdx) => (
-            <div key={wIdx} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              {week.map((day, dIdx) => (
-                <div
-                  key={dIdx}
-                  title={`${day.dateKey}: ${(day.minutes / 60).toFixed(1)} hrs`}
-                  style={{
-                    width: '12px',
-                    height: '12px',
-                    backgroundColor: getColor(day.minutes),
-                    borderRadius: '2px',
-                    border: '1px solid var(--border-color)',
-                    transition: 'transform 0.2s',
-                    cursor: 'pointer'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.transform = 'scale(1.5)';
-                    e.target.style.zIndex = 10;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.transform = 'scale(1)';
-                    e.target.style.zIndex = 1;
-                  }}
-                />
-              ))}
-            </div>
-          ))}
+        <div style={{ display: 'flex' }}>
+          {renderWeeks}
         </div>
       </div>
 

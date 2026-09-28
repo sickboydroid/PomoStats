@@ -3,9 +3,10 @@ import { exportToJson, exportToCsv } from '../utils/exportUtils';
 import ActivityHeatmap from './charts/ActivityHeatmap';
 import WeekdayAveragesChart from './charts/WeekdayAveragesChart';
 import MonthlyActivityChart from './charts/MonthlyActivityChart';
+import YearlyActivityChart from './charts/YearlyActivityChart';
 import MovingAverageChart from './charts/MovingAverageChart';
 import CoolFacts from './charts/CoolFacts';
-import { Download, FileJson, FileSpreadsheet, Upload } from 'lucide-react';
+import { FileJson, FileSpreadsheet, Upload } from 'lucide-react';
 
 export default function DashboardView({ data, onImport }) {
   const handleImport = (e) => {
@@ -42,9 +43,9 @@ export default function DashboardView({ data, onImport }) {
   }
 
   return (
-    <div className="flex-col gap-4 animate-slide-up">
+    <div className="flex-col gap-6 animate-slide-up">
       {/* Top Bar */}
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-6">
         <h2>Dashboard</h2>
         <div className="flex gap-2">
           <label className="button outline flex items-center gap-2" style={{ display: 'inline-flex', cursor: 'pointer', padding: '0.6em 1.2em', borderRadius: '8px', border: '1px solid var(--accent-cyan)', color: 'var(--accent-cyan)' }}>
@@ -60,23 +61,34 @@ export default function DashboardView({ data, onImport }) {
         </div>
       </div>
 
-      {/* Cool Facts Widgets */}
-      <CoolFacts data={data} />
+      {/* Group: Key Metrics & Facts */}
+      <div>
+        <h3 className="text-muted uppercase tracking-wider mb-2 text-sm" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>Key Metrics</h3>
+        <CoolFacts data={data} />
+      </div>
 
-      {/* Moving Average */}
-      <div className="mb-4">
+      {/* Group: Moving Averages */}
+      <div>
+        <h3 className="text-muted uppercase tracking-wider mb-2 text-sm" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>Trends</h3>
         <MovingAverageChart data={data} />
       </div>
 
-      {/* Heatmap */}
-      <div className="mb-4">
+      {/* Group: History Heatmap */}
+      <div>
+        <h3 className="text-muted uppercase tracking-wider mb-2 text-sm" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>History</h3>
         <ActivityHeatmap data={data} />
       </div>
 
-      {/* Bar and Area Charts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <WeekdayAveragesChart data={data} />
-        <MonthlyActivityChart data={data} />
+      {/* Group: Detailed Breakdowns */}
+      <div>
+        <h3 className="text-muted uppercase tracking-wider mb-2 text-sm" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>Breakdowns</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <WeekdayAveragesChart data={data} />
+          <MonthlyActivityChart data={data} />
+          <div className="md:col-span-2">
+            <YearlyActivityChart data={data} />
+          </div>
+        </div>
       </div>
     </div>
   );

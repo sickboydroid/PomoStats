@@ -27,7 +27,7 @@ export async function fetchPomofocusData(authorization, cookie, onProgress) {
   while (hasMore) {
     try {
       if (onProgress) {
-        onProgress(allData.length);
+        onProgress(pageNum);
       }
 
       const promises = [];

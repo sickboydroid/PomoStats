@@ -107,17 +107,10 @@ export default function FetchView({ onDataFetched }) {
           <div className="mb-4">
             <div className="flex justify-between text-sm mb-2">
               <span className="text-cyan-400" style={{ color: 'var(--accent-cyan)' }}>Fetching...</span>
-              <span>Records Fetched: {progress}</span>
+              <span>Pages Fetched: {progress}</span>
             </div>
             <div style={{ width: '100%', height: '4px', background: 'var(--border-color)', borderRadius: '2px', overflow: 'hidden' }}>
-              <div 
-                style={{ 
-                  height: '100%', 
-                  width: '50%', // Indeterminate-like look
-                  background: 'var(--accent-cyan)',
-                  animation: 'slideUp 1s infinite alternate' 
-                }} 
-              />
+              <div className="indeterminate-bar" />
             </div>
           </div>
         )}

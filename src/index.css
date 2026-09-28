@@ -42,8 +42,31 @@ h1, h2, h3, h4, h5, h6 {
   color: #ffffff;
 }
 
+h1 { font-size: 1.5rem; }
+h2 { font-size: 1.25rem; }
+h3 { font-size: 1.1rem; }
+
 p {
   margin: 0 0 1rem 0;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
 }
 
 /* Animations */
@@ -56,6 +79,18 @@ p {
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes indeterminateProgress {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+.indeterminate-bar {
+  height: 100%;
+  width: 50%;
+  background: var(--accent-cyan);
+  animation: indeterminateProgress 1.5s infinite linear;
 }
 
 .animate-slide-up {

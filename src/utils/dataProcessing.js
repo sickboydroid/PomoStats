@@ -42,10 +42,27 @@ export function getMonthlyActivity(data) {
     const date = new Date(year, month - 1);
     return {
       monthStr: monthKey,
-      name: date.toLocaleString('default', { month: 'short', year: '2-digit' }),
+      name: date.toLocaleString('default', { month: 'short', year: 'numeric' }),
       totalHours: parseFloat((monthlyTotals[monthKey] / 60).toFixed(2))
     };
   });
+}
+
+export function getYearlyActivity(data) {
+  if (!data || data.length === 0) return [];
+  const yearlyTotals = {};
+  data.forEach(item => {
+    const date = new Date(item.created);
+    if (!isNaN(date.getTime())) {
+      const yearStr = `${date.getFullYear()}`;
+      if (!yearlyTotals[yearStr]) yearlyTotals[yearStr] = 0;
+      yearlyTotals[yearStr] += item.minutes || 0;
+    }
+  });
+  return Object.keys(yearlyTotals).sort().map(yearStr => ({
+    name: yearStr,
+    totalHours: parseFloat((yearlyTotals[yearStr] / 60).toFixed(2))
+  }));
 }
 
 export function getDailyActivityMap(data) {
@@ -123,12 +140,29 @@ export function getCoolFacts(data) {
   const lastDate = new Date(dates[dates.length - 1]);
   const totalDays = Math.max(1, Math.ceil((lastDate - firstDate) / (1000 * 60 * 60 * 24)));
   
+  // Most Productive Month
+  const monthlyTotals = getMonthlyActivity(data);
+  let bestMonth = { name: null, hours: 0 };
+  monthlyTotals.forEach(m => {
+    if (m.totalHours > bestMonth.hours) bestMonth = { name: m.name, hours: m.totalHours };
+  });
+
+  // Most Productive Year
+  const yearlyTotals = getYearlyActivity(data);
+  let bestYear = { name: null, hours: 0 };
+  yearlyTotals.forEach(y => {
+    if (y.totalHours > bestYear.hours) bestYear = { name: y.name, hours: y.totalHours };
+  });
+
   return {
     mostStudiedDay: maxDay,
     longestStreak,
     bestWeek,
-    avgHoursPerMonth: ((totalMinutes / 60) / (totalDays / 30)).toFixed(1),
-    avgHoursPerYear: ((totalMinutes / 60) / (totalDays / 365)).toFixed(1),
+    bestMonth,
+    bestYear,
+    totalPomodoros: data.length,
+    avgHoursPerMonth: ((totalMinutes / 60) / Math.max(1, totalDays / 30)).toFixed(1),
+    avgHoursPerYear: ((totalMinutes / 60) / Math.max(1, totalDays / 365)).toFixed(1),
     totalDaysActive: dates.length,
   };
 }
