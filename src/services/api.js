@@ -9,7 +9,8 @@ export async function fetchPomofocusData(authorization, cookie, onProgress) {
         onProgress(pageNum);
       }
 
-      const response = await fetch(`https://pomofocus.io/api/daily-report-items?pageNum=${pageNum}`, {
+      const baseUrl = import.meta.env.DEV ? '' : 'https://pomofocus.io';
+      const response = await fetch(`${baseUrl}/api/daily-report-items?pageNum=${pageNum}`, {
         method: 'GET',
         headers: {
           'accept': 'application/json, text/plain, */*',
