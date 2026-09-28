@@ -16,6 +16,7 @@ export async function fetchPomofocusData(authorization, cookie, onProgress) {
           'accept': 'application/json, text/plain, */*',
           'authorization': authorization,
           'cookie': cookie,
+          'x-client-version': '1.0.1',
         },
       });
 
