@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import FetchView from './components/FetchView';
 import DashboardView from './components/DashboardView';
 import { Activity, DownloadCloud } from 'lucide-react';
-import logoImage from './assets/icon_with_app_name.png';
+import logoImage from './assets/logo.jpg';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');

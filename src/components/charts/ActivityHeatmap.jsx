@@ -33,11 +33,21 @@ export default function ActivityHeatmap({ data }) {
 
   const maxMinutes = Math.max(...Object.values(dailyMap).length ? Object.values(dailyMap) : [0], 120);
   
-  const getColor = (minutes) => {
+  const YEAR_COLORS = [
+    '0, 240, 255', // Cyan
+    '236, 72, 153', // Pink
+    '245, 158, 11', // Orange
+    '139, 92, 246', // Purple
+    '16, 185, 129', // Emerald
+  ];
+
+  const getColor = (minutes, year) => {
     if (minutes === 0) return 'var(--bg-main)';
     const intensity = Math.min(minutes / maxMinutes, 1);
     const alpha = 0.2 + (intensity * 0.8);
-    return `rgba(0, 240, 255, ${alpha})`;
+    // Hash year to color
+    const colorIdx = year % YEAR_COLORS.length;
+    return `rgba(${YEAR_COLORS[colorIdx]}, ${alpha})`;
   };
 
   // Scroll to the far right on mount (most recent data)
@@ -73,9 +83,13 @@ export default function ActivityHeatmap({ data }) {
       }
     }
 
-    // Add Labels
+    // Add Labels for the current week if it's the start
+    if (wIdx === 0) {
+      yearLabels.push({ offset: currentOffset, label: currentYear.toString() });
+    }
+    
+    // Check if this week starts a new month (or is week 0)
     if (wIdx === 0 || isMonthChange || isYearChange) {
-      // Find the first day in this week that belongs to the new month
       const firstDayOfMonth = week.find(d => d.date.getDate() <= 7);
       if (firstDayOfMonth || wIdx === 0) {
         monthLabels.push({
@@ -83,13 +97,15 @@ export default function ActivityHeatmap({ data }) {
           label: (firstDayOfMonth ? firstDayOfMonth.date : thurs).toLocaleString('default', { month: 'short' })
         });
       }
-      
-      if (wIdx === 0 || isYearChange) {
-        yearLabels.push({
-          offset: currentOffset,
-          label: currentYear.toString()
-        });
-      }
+    }
+
+    // If next week is a year change, push the NEXT year's label at the NEXT offset
+    if (isYearChange) {
+      const nextThurs = weeks[wIdx + 1][3].date;
+      yearLabels.push({
+        offset: currentOffset + 12 + marginRight,
+        label: nextThurs.getFullYear().toString()
+      });
     }
 
     const weekWidth = 12 + marginRight; // 12px width + margin
@@ -98,29 +114,34 @@ export default function ActivityHeatmap({ data }) {
 
     return (
       <div key={wIdx} style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginRight: `${marginRight}px` }}>
-        {week.map((day, dIdx) => (
-          <div
-            key={dIdx}
-            title={`${day.dateKey}: ${(day.minutes / 60).toFixed(1)} hrs`}
-            style={{
-              width: '12px',
-              height: '12px',
-              backgroundColor: getColor(day.minutes),
-              borderRadius: '2px',
-              border: '1px solid var(--border-color)',
-              transition: 'transform 0.2s',
-              cursor: 'pointer'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = 'scale(1.5)';
-              e.target.style.zIndex = 10;
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = 'scale(1)';
-              e.target.style.zIndex = 1;
-            }}
-          />
-        ))}
+        {week.map((day, dIdx) => {
+          const isZero = day.minutes === 0;
+          const tooltip = isZero ? `${day.dateKey}: No activity` : `${day.dateKey}: ${(day.minutes / 60).toFixed(1)} hrs`;
+          
+          return (
+            <div
+              key={dIdx}
+              title={tooltip}
+              style={{
+                width: '12px',
+                height: '12px',
+                backgroundColor: getColor(day.minutes, currentYear),
+                borderRadius: '2px',
+                border: '1px solid var(--border-color)',
+                transition: 'transform 0.2s',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'scale(1.5)';
+                e.target.style.zIndex = 10;
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'scale(1)';
+                e.target.style.zIndex = 1;
+              }}
+            />
+          );
+        })}
       </div>
     );
   });
@@ -184,23 +205,6 @@ export default function ActivityHeatmap({ data }) {
         <div style={{ display: 'flex' }}>
           {renderWeeks}
         </div>
-      </div>
-
-      <div className="flex justify-between text-muted text-sm mt-2">
-        <span>Less</span>
-        <div className="flex gap-2">
-          {[0, 0.25, 0.5, 0.75, 1].map((intensity, i) => (
-            <div 
-              key={i}
-              style={{
-                width: '12px', height: '12px', borderRadius: '2px',
-                backgroundColor: intensity === 0 ? 'var(--bg-main)' : `rgba(0, 240, 255, ${0.2 + intensity * 0.8})`,
-                border: '1px solid var(--border-color)'
-              }}
-            />
-          ))}
-        </div>
-        <span>More</span>
       </div>
     </div>
   );

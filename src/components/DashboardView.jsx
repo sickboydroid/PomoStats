@@ -5,6 +5,7 @@ import WeekdayAveragesChart from './charts/WeekdayAveragesChart';
 import MonthlyActivityChart from './charts/MonthlyActivityChart';
 import YearlyActivityChart from './charts/YearlyActivityChart';
 import MovingAverageChart from './charts/MovingAverageChart';
+import HourlyActivityChart from './charts/HourlyActivityChart';
 import CoolFacts from './charts/CoolFacts';
 import { FileJson, FileSpreadsheet, Upload } from 'lucide-react';
 
@@ -67,28 +68,29 @@ export default function DashboardView({ data, onImport }) {
         <CoolFacts data={data} />
       </div>
 
-      {/* Group: Moving Averages */}
+      {/* Group: Trends */}
       <div>
         <h3 className="text-muted uppercase tracking-wider mb-2 text-sm" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>Trends</h3>
         <MovingAverageChart data={data} />
+      </div>
+
+      {/* Group: Detailed Breakdowns */}
+      <div>
+        <h3 className="text-muted uppercase tracking-wider mb-2 text-sm" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>Time Analysis</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-4">
+          <YearlyActivityChart data={data} />
+          <MonthlyActivityChart data={data} />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+          <WeekdayAveragesChart data={data} />
+          <HourlyActivityChart data={data} />
+        </div>
       </div>
 
       {/* Group: History Heatmap */}
       <div>
         <h3 className="text-muted uppercase tracking-wider mb-2 text-sm" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>History</h3>
         <ActivityHeatmap data={data} />
-      </div>
-
-      {/* Group: Detailed Breakdowns */}
-      <div>
-        <h3 className="text-muted uppercase tracking-wider mb-2 text-sm" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>Breakdowns</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <WeekdayAveragesChart data={data} />
-          <MonthlyActivityChart data={data} />
-          <div className="md:col-span-2">
-            <YearlyActivityChart data={data} />
-          </div>
-        </div>
       </div>
     </div>
   );

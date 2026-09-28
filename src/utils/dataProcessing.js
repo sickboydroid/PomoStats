@@ -183,7 +183,6 @@ export function getMovingAverage(data, windowDays = 7) {
     const key = d.toISOString().split('T')[0];
     continuousMap[key] = dailyMap[key] || 0;
   }
-
   const continuousDates = Object.keys(continuousMap).sort();
   const result = [];
 
@@ -208,4 +207,31 @@ export function getMovingAverage(data, windowDays = 7) {
   }
 
   return result;
+}
+
+export function getHourlyActivity(data) {
+  if (!data || data.length === 0) return Array.from({ length: 24 }, (_, i) => ({ hour: i, avgMinutes: 0 }));
+
+  const hourlyMap = Array.from({ length: 24 }, () => 0);
+  const dailyMap = getDailyActivityMap(data);
+  const totalDays = Object.keys(dailyMap).length;
+
+  data.forEach(item => {
+    const d = new Date(item.created);
+    if (!isNaN(d.getTime())) {
+      hourlyMap[d.getHours()] += item.minutes || 0;
+    }
+  });
+
+  return hourlyMap.map((totalMinutes, i) => {
+    const avgMin = totalDays > 0 ? parseFloat((totalMinutes / totalDays).toFixed(1)) : 0;
+    // Format hour nicely (e.g., "12 AM", "1 PM")
+    const ampm = i >= 12 ? 'PM' : 'AM';
+    const hr = (i % 12) === 0 ? 12 : (i % 12);
+    return {
+      hourIndex: i,
+      name: `${hr} ${ampm}`,
+      avgMinutes: avgMin
+    };
+  });
 }
