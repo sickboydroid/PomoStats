@@ -29,7 +29,10 @@ export default function FetchView({ onDataFetched }) {
       setSuccessCount(data.length);
       onDataFetched(data);
     } catch (err) {
-      setError(err.message || 'An error occurred while fetching data. Check CORS or network.');
+      const errorDetails = err instanceof Error 
+        ? `${err.name}: ${err.message}\n${err.stack || ''}` 
+        : typeof err === 'object' ? JSON.stringify(err, null, 2) : String(err);
+      setError(errorDetails);
     } finally {
       setIsFetching(false);
     }
@@ -69,9 +72,9 @@ export default function FetchView({ onDataFetched }) {
         </div>
 
         {error && (
-          <div className="flex items-center gap-2 mb-4" style={{ color: '#ef4444', background: 'rgba(239, 68, 68, 0.1)', padding: '0.75rem', borderRadius: '8px' }}>
-            <AlertTriangle size={18} />
-            <span className="text-sm">{error}</span>
+          <div className="flex gap-2 mb-4" style={{ color: '#ef4444', background: 'rgba(239, 68, 68, 0.1)', padding: '0.75rem', borderRadius: '8px', alignItems: 'flex-start' }}>
+            <AlertTriangle size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
+            <span className="text-sm" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontFamily: 'monospace' }}>{error}</span>
           </div>
         )}
 
