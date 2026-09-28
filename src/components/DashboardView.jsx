@@ -3,6 +3,8 @@ import { exportToJson, exportToCsv } from '../utils/exportUtils';
 import ActivityHeatmap from './charts/ActivityHeatmap';
 import WeekdayAveragesChart from './charts/WeekdayAveragesChart';
 import MonthlyActivityChart from './charts/MonthlyActivityChart';
+import MovingAverageChart from './charts/MovingAverageChart';
+import CoolFacts from './charts/CoolFacts';
 import { Download, FileJson, FileSpreadsheet, Upload } from 'lucide-react';
 
 export default function DashboardView({ data, onImport }) {
@@ -25,10 +27,6 @@ export default function DashboardView({ data, onImport }) {
     };
     reader.readAsText(file);
   };
-
-  const totalMinutes = data.reduce((acc, curr) => acc + (curr.minutes || 0), 0);
-  const totalHours = (totalMinutes / 60).toFixed(1);
-  const totalPomodoros = data.length; // Assuming each record is one task/pomodoro entry.
 
   if (!data || data.length === 0) {
     return (
@@ -62,16 +60,12 @@ export default function DashboardView({ data, onImport }) {
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div className="card text-center">
-          <div className="text-muted text-sm uppercase tracking-wider mb-2">Total Hours Focused</div>
-          <div style={{ fontSize: '2.5rem', fontWeight: 700, color: 'var(--accent-cyan)' }}>{totalHours}</div>
-        </div>
-        <div className="card text-center">
-          <div className="text-muted text-sm uppercase tracking-wider mb-2">Total Sessions</div>
-          <div style={{ fontSize: '2.5rem', fontWeight: 700, color: 'var(--accent-cyan)' }}>{totalPomodoros}</div>
-        </div>
+      {/* Cool Facts Widgets */}
+      <CoolFacts data={data} />
+
+      {/* Moving Average */}
+      <div className="mb-4">
+        <MovingAverageChart data={data} />
       </div>
 
       {/* Heatmap */}
@@ -80,7 +74,7 @@ export default function DashboardView({ data, onImport }) {
       </div>
 
       {/* Bar and Area Charts */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <WeekdayAveragesChart data={data} />
         <MonthlyActivityChart data={data} />
       </div>

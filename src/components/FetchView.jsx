@@ -1,14 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { fetchPomofocusData } from '../services/api';
-import { DownloadCloud, Play, AlertTriangle, CheckCircle } from 'lucide-react';
+import { DownloadCloud, Play, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 
 export default function FetchView({ onDataFetched }) {
   const [authorization, setAuthorization] = useState('');
   const [cookie, setCookie] = useState('');
+  const [lastUsed, setLastUsed] = useState(null);
   const [isFetching, setIsFetching] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState(null);
   const [successCount, setSuccessCount] = useState(0);
+
+  useEffect(() => {
+    const savedAuth = localStorage.getItem('pomostats_auth');
+    const savedCookie = localStorage.getItem('pomostats_cookie');
+    const savedLastUsed = localStorage.getItem('pomostats_lastUsed');
+    
+    if (savedAuth) setAuthorization(savedAuth);
+    if (savedCookie) setCookie(savedCookie);
+    if (savedLastUsed) setLastUsed(savedLastUsed);
+  }, []);
 
   const handleFetch = async (e) => {
     e.preventDefault();
@@ -16,6 +27,13 @@ export default function FetchView({ onDataFetched }) {
       setError('Authorization and Cookie headers are required.');
       return;
     }
+
+    // Save credentials
+    const now = new Date().toLocaleString();
+    localStorage.setItem('pomostats_auth', authorization);
+    localStorage.setItem('pomostats_cookie', cookie);
+    localStorage.setItem('pomostats_lastUsed', now);
+    setLastUsed(now);
 
     setIsFetching(true);
     setError(null);
@@ -47,6 +65,13 @@ export default function FetchView({ onDataFetched }) {
       <p className="text-muted text-sm mb-4">
         Extract your Authorization token and Cookie from the network tab in your browser's dev tools while logged into Pomofocus.
       </p>
+
+      {lastUsed && (
+        <div className="flex items-center gap-2 mb-4 text-sm" style={{ color: 'var(--accent-cyan)' }}>
+          <Clock size={16} />
+          <span>Credentials last used: {lastUsed}</span>
+        </div>
+      )}
 
       <form onSubmit={handleFetch} className="flex-col gap-4">
         <div>
@@ -82,7 +107,7 @@ export default function FetchView({ onDataFetched }) {
           <div className="mb-4">
             <div className="flex justify-between text-sm mb-2">
               <span className="text-cyan-400" style={{ color: 'var(--accent-cyan)' }}>Fetching...</span>
-              <span>Page: {progress}</span>
+              <span>Records Fetched: {progress}</span>
             </div>
             <div style={{ width: '100%', height: '4px', background: 'var(--border-color)', borderRadius: '2px', overflow: 'hidden' }}>
               <div 

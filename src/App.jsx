@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import FetchView from './components/FetchView';
 import DashboardView from './components/DashboardView';
 import { Activity, DownloadCloud } from 'lucide-react';
+import logoImage from './assets/icon_with_app_name.png';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -45,8 +46,7 @@ function App() {
       {/* Header */}
       <header className="flex justify-between items-center mb-4 pb-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
         <div className="flex items-center gap-2">
-          <Activity size={32} style={{ color: 'var(--accent-cyan)' }} />
-          <h1 style={{ margin: 0 }}>Pomofocus Visualizer</h1>
+          <img src={logoImage} alt="PomoStats Logo" style={{ height: '32px', objectFit: 'contain' }} />
         </div>
         
         {/* Navigation Tabs */}
