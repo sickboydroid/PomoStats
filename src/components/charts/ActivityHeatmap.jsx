@@ -92,10 +92,10 @@ export default function ActivityHeatmap({ data }) {
       const isJan = targetDate.getMonth() === 0;
       
       let labelContent;
-      if (wIdx === 0 || isJan || isYearChange) {
+      if (isJan || wIdx === 0) {
         labelContent = (
           <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>
-            {monthStr} <span style={{ opacity: 0.6, fontSize: '10px', marginLeft: '2px' }}>{yearStr}</span>
+            {monthStr} <span style={{ opacity: 0.6, fontSize: '11px', fontWeight: 'normal', marginLeft: '2px' }}>({yearStr})</span>
           </span>
         );
       } else {

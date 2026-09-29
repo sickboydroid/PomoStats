@@ -5,8 +5,13 @@ export async function fetchPomofocusData(authorization, cookie, onProgress) {
   const BATCH_SIZE = 10;
 
   const fetchPage = async (page) => {
-    const baseUrl = import.meta.env.DEV ? '' : 'https://pomofocus.io';
-    const response = await fetch(`${baseUrl}/api/daily-report-items?pageNum=${page}`, {
+    const targetUrl = `https://pomofocus.io/api/daily-report-items?pageNum=${page}`;
+    // Use corsproxy.io for production to bypass CORS, while keeping local proxy for dev
+    const url = import.meta.env.DEV 
+      ? `/api/daily-report-items?pageNum=${page}` 
+      : `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'accept': 'application/json, text/plain, */*',
