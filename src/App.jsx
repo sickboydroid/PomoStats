@@ -3,7 +3,6 @@ import FetchView from './components/FetchView';
 import DashboardView from './components/DashboardView';
 import { DownloadCloud, Upload, FileJson, FileSpreadsheet } from 'lucide-react';
 import { exportToJson, exportToCsv } from './utils/exportUtils';
-import logoImage from './assets/logo.jpg';
 
 function App() {
   const [data, setData] = useState([]);
@@ -68,8 +67,8 @@ function App() {
     <div className="container">
       {/* Header */}
       <header className="flex justify-between items-center mb-6 pb-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
-        <div className="flex items-center gap-2">
-          <img src={logoImage} alt="PomoStats Logo" style={{ height: '36px', objectFit: 'contain' }} />
+        <div className="flex items-center gap-2" style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.5px' }}>
+          <span>🍅</span> PomoStats
         </div>
         
         {/* Action Controls Toolbar */}

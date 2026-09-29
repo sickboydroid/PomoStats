@@ -77,8 +77,18 @@ p {
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes popIn {
+  0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 @keyframes indeterminateProgress {
@@ -90,11 +100,19 @@ p {
   height: 100%;
   width: 50%;
   background: var(--accent-cyan);
-  animation: indeterminateProgress 1.5s infinite linear;
+  animation: indeterminateProgress 1s infinite cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 .animate-slide-up {
-  animation: slideUp 0.4s ease-out forwards;
+  animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Interactive elements cursor */
+.recharts-wrapper, .recharts-surface {
+  cursor: crosshair;
+}
+.heatmap-scroll-container > div > div > div {
+  cursor: pointer;
 }
 
 /* Components */
@@ -197,7 +215,7 @@ button:disabled, label.button:disabled {
   justify-content: center;
   z-index: 1000;
   padding: 1rem;
-  animation: slideUp 0.2s ease-out;
+  animation: fadeIn 0.15s ease-out forwards;
 }
 
 .modal-content {
@@ -211,6 +229,7 @@ button:disabled, label.button:disabled {
   padding: 1.5rem;
   max-height: 90vh;
   overflow-y: auto;
+  animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 .modal-close-btn {
