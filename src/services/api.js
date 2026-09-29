@@ -6,10 +6,10 @@ export async function fetchPomofocusData(authorization, cookie, onProgress) {
 
   const fetchPage = async (page) => {
     const targetUrl = `https://pomofocus.io/api/daily-report-items?pageNum=${page}`;
-    // Use codetabs proxy for production to bypass CORS
+    // Use cors-anywhere for production to bypass CORS
     const url = import.meta.env.DEV 
       ? `/api/daily-report-items?pageNum=${page}` 
-      : `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`;
+      : `https://cors-anywhere.herokuapp.com/${targetUrl}`;
 
     const response = await fetch(url, {
       method: 'GET',

@@ -51,10 +51,16 @@ export default function FetchView({ onDataFetched, onClose }) {
         if (onClose) onClose();
       }, 1200);
     } catch (err) {
-      const errorDetails = err instanceof Error 
-        ? `${err.name}: ${err.message}\n${err.stack || ''}` 
-        : typeof err === 'object' ? JSON.stringify(err, null, 2) : String(err);
-      setError(errorDetails);
+      if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        setError(
+          "CORS Error: To fetch data directly from Pomofocus on this site, please temporarily enable the proxy by visiting https://cors-anywhere.herokuapp.com/corsdemo, click 'Request temporary access', and then try fetching again."
+        );
+      } else {
+        const errorDetails = err instanceof Error 
+          ? `${err.name}: ${err.message}\n${err.stack || ''}` 
+          : typeof err === 'object' ? JSON.stringify(err, null, 2) : String(err);
+        setError(errorDetails);
+      }
     } finally {
       setIsFetching(false);
     }

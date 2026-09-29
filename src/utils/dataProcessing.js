@@ -171,10 +171,15 @@ export function getWeeklyActivity(data) {
   if (!data || data.length === 0) return [];
   const weeklyTotals = {};
   
+  let minDate = new Date();
+  let maxDate = new Date('1970-01-01');
+
   data.forEach(item => {
     const d = new Date(item.created);
     if (!isNaN(d.getTime())) {
-      // Get ISO week string to group by Monday-Sunday calendar week
+      if (d < minDate) minDate = new Date(d);
+      if (d > maxDate) maxDate = new Date(d);
+      
       const dCopy = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
       const dayNum = dCopy.getUTCDay() || 7;
       dCopy.setUTCDate(dCopy.getUTCDate() + 4 - dayNum);
@@ -187,12 +192,25 @@ export function getWeeklyActivity(data) {
     }
   });
 
+  // Pad missing weeks
+  const startD = new Date(minDate);
+  while (startD <= maxDate) {
+    const dCopy = new Date(Date.UTC(startD.getFullYear(), startD.getMonth(), startD.getDate()));
+    const dayNum = dCopy.getUTCDay() || 7;
+    dCopy.setUTCDate(dCopy.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(dCopy.getUTCFullYear(),0,1));
+    const weekNo = Math.ceil((((dCopy - yearStart) / 86400000) + 1)/7);
+    const weekStr = `${dCopy.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+    
+    if (!weeklyTotals[weekStr]) weeklyTotals[weekStr] = 0;
+    startD.setDate(startD.getDate() + 7);
+  }
+
   return Object.keys(weeklyTotals).sort().map(weekKey => {
     const [yearStr, weekStr] = weekKey.split('-W');
     const year = parseInt(yearStr, 10);
     const week = parseInt(weekStr, 10);
     
-    // Get approx Thursday of the week to determine the month
     const d = new Date(year, 0, 1);
     const days = (week - 1) * 7;
     d.setDate(d.getDate() + days - (d.getDay() || 7) + 1 + 3);
@@ -208,9 +226,21 @@ export function getWeeklyActivity(data) {
 export function getDailyActivity(data) {
   if (!data || data.length === 0) return [];
   const dailyMap = getDailyActivityMap(data);
-  return Object.keys(dailyMap).sort().map(dateStr => ({
+  const keys = Object.keys(dailyMap).sort();
+  const firstDate = new Date(keys[0]);
+  const lastDate = new Date(keys[keys.length - 1]);
+  
+  const paddedMap = { ...dailyMap };
+  for (let d = new Date(firstDate); d <= lastDate; d.setDate(d.getDate() + 1)) {
+    const k = d.toISOString().split('T')[0];
+    if (paddedMap[k] === undefined) {
+      paddedMap[k] = 0;
+    }
+  }
+
+  return Object.keys(paddedMap).sort().map(dateStr => ({
     date: dateStr,
-    actualHours: parseFloat((dailyMap[dateStr] / 60).toFixed(2))
+    actualHours: parseFloat((paddedMap[dateStr] / 60).toFixed(2))
   }));
 }
 
