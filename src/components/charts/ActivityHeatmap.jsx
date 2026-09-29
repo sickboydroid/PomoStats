@@ -42,12 +42,13 @@ export default function ActivityHeatmap({ data }) {
   ];
 
   const getColor = (minutes, year) => {
-    if (minutes === 0) return 'var(--bg-main)';
+    if (minutes === 0) return 'rgba(255, 255, 255, 0.05)'; // Subtle visible empty cell
     const intensity = Math.min(minutes / maxMinutes, 1);
-    const alpha = 0.2 + (intensity * 0.8);
+    // Non-linear scaling to boost visibility of smaller sessions
+    const alpha = 0.25 + (Math.pow(intensity, 0.5) * 0.75);
     // Hash year to color
     const colorIdx = year % YEAR_COLORS.length;
-    return `rgba(${YEAR_COLORS[colorIdx]}, ${alpha})`;
+    return `rgba(${YEAR_COLORS[colorIdx]}, ${alpha.toFixed(3)})`;
   };
 
   // Scroll to the far right on mount (most recent data)
@@ -57,9 +58,7 @@ export default function ActivityHeatmap({ data }) {
     }
   }, [data]);
 
-  const monthLabels = [];
-  const yearLabels = [];
-
+  const combinedLabels = [];
   let currentOffset = 0;
   
   // Calculate gaps and label positions
@@ -75,41 +74,41 @@ export default function ActivityHeatmap({ data }) {
     if (wIdx < weeks.length - 1) {
       const nextThurs = weeks[wIdx + 1][3].date;
       if (nextThurs.getFullYear() !== currentYear) {
-        marginRight = 32; // Large gap for year
+        marginRight = 24; // Medium-large gap for year
         isYearChange = true;
       } else if (nextThurs.getMonth() !== currentMonth) {
-        marginRight = 16; // Medium gap for month
+        marginRight = 12; // Medium gap for month
         isMonthChange = true;
       }
     }
 
-    // Add Labels for the current week if it's the start
-    if (wIdx === 0) {
-      yearLabels.push({ offset: currentOffset, label: currentYear.toString() });
-    }
-    
     // Check if this week starts a new month (or is week 0)
     if (wIdx === 0 || isMonthChange || isYearChange) {
       const firstDayOfMonth = week.find(d => d.date.getDate() <= 7);
-      if (firstDayOfMonth || wIdx === 0) {
-        monthLabels.push({
-          offset: currentOffset,
-          label: (firstDayOfMonth ? firstDayOfMonth.date : thurs).toLocaleString('default', { month: 'short' })
-        });
+      const targetDate = firstDayOfMonth ? firstDayOfMonth.date : thurs;
+      
+      const monthStr = targetDate.toLocaleString('default', { month: 'short' });
+      const yearStr = targetDate.getFullYear();
+      const isJan = targetDate.getMonth() === 0;
+      
+      let labelContent;
+      if (wIdx === 0 || isJan || isYearChange) {
+        labelContent = (
+          <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>
+            {monthStr} <span style={{ opacity: 0.6, fontSize: '10px', marginLeft: '2px' }}>{yearStr}</span>
+          </span>
+        );
+      } else {
+        labelContent = <span style={{ color: 'var(--text-muted)' }}>{monthStr}</span>;
       }
-    }
 
-    // If next week is a year change, push the NEXT year's label at the NEXT offset
-    if (isYearChange) {
-      const nextThurs = weeks[wIdx + 1][3].date;
-      yearLabels.push({
-        offset: currentOffset + 12 + marginRight,
-        label: nextThurs.getFullYear().toString()
+      combinedLabels.push({
+        offset: currentOffset,
+        node: labelContent
       });
     }
 
     const weekWidth = 12 + marginRight; // 12px width + margin
-    const colOffset = currentOffset;
     currentOffset += weekWidth;
 
     return (
@@ -126,18 +125,19 @@ export default function ActivityHeatmap({ data }) {
                 width: '12px',
                 height: '12px',
                 backgroundColor: getColor(day.minutes, currentYear),
-                borderRadius: '2px',
-                border: '1px solid var(--border-color)',
-                transition: 'transform 0.2s',
+                borderRadius: '3px',
+                transition: 'transform 0.15s ease, z-index 0s',
                 cursor: 'pointer'
               }}
               onMouseEnter={(e) => {
-                e.target.style.transform = 'scale(1.5)';
+                e.target.style.transform = 'scale(1.4)';
                 e.target.style.zIndex = 10;
+                e.target.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
               }}
               onMouseLeave={(e) => {
                 e.target.style.transform = 'scale(1)';
                 e.target.style.zIndex = 1;
+                e.target.style.boxShadow = 'none';
               }}
             />
           );
@@ -159,45 +159,24 @@ export default function ActivityHeatmap({ data }) {
           paddingBottom: '1rem',
           display: 'flex',
           flexDirection: 'column',
-          gap: '4px'
+          gap: '8px'
         }}
         className="heatmap-scroll-container"
       >
-        {/* Year Labels */}
-        <div style={{ display: 'flex', position: 'relative', height: '16px', minWidth: `${currentOffset}px` }}>
-          {yearLabels.map((y, i) => (
-            <span 
-              key={`y-${i}`} 
-              style={{ 
-                position: 'absolute', 
-                left: `${y.offset}px`,
-                fontSize: '11px',
-                fontWeight: 'bold',
-                color: 'var(--text-main)',
-                backgroundColor: 'rgba(255,255,255,0.1)',
-                padding: '0 4px',
-                borderRadius: '4px'
-              }}
-            >
-              {y.label}
-            </span>
-          ))}
-        </div>
-
-        {/* Month Labels */}
+        {/* Unified Month/Year Labels */}
         <div style={{ display: 'flex', position: 'relative', height: '20px', minWidth: `${currentOffset}px` }}>
-          {monthLabels.map((m, i) => (
-            <span 
-              key={`m-${i}`} 
+          {combinedLabels.map((item, i) => (
+            <div 
+              key={`label-${i}`} 
               style={{ 
                 position: 'absolute', 
-                left: `${m.offset}px`,
+                left: `${item.offset}px`,
                 fontSize: '12px',
-                color: 'var(--text-muted)'
+                whiteSpace: 'nowrap'
               }}
             >
-              {m.label}
-            </span>
+              {item.node}
+            </div>
           ))}
         </div>
 
