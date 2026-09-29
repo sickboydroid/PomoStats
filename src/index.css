@@ -1,7 +1,7 @@
 :root {
-  --bg-main: #0a0a0c;
-  --bg-card: #131418;
-  --bg-card-hover: #1c1d24;
+  --bg-main: #282828;
+  --bg-card: #333333;
+  --bg-card-hover: #3f3f46;
   
   --text-main: #e2e8f0;
   --text-muted: #94a3b8;
@@ -101,14 +101,14 @@ p {
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem;
 }
 
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 1rem;
   transition: all 0.3s ease;
 }
 

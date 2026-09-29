@@ -6,7 +6,7 @@ export default function WeekdayAveragesChart({ data }) {
   const chartData = getWeekdayAverages(data);
 
   return (
-    <div className="card w-full animate-slide-up" style={{ height: '350px' }}>
+    <div className="card w-full animate-slide-up" style={{ height: '250px' }}>
       <h3 style={{ marginBottom: '0.25rem' }}>Weekly Pattern</h3>
       <p className="text-muted text-sm mb-4">Average hours focused per day of the week over all time.</p>
       <ResponsiveContainer width="100%" height="80%">

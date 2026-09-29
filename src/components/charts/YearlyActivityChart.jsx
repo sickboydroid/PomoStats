@@ -6,7 +6,7 @@ export default function YearlyActivityChart({ data }) {
   const chartData = getYearlyActivity(data);
 
   return (
-    <div className="card w-full animate-slide-up" style={{ height: '350px' }}>
+    <div className="card w-full animate-slide-up" style={{ height: '250px' }}>
       <h3 style={{ marginBottom: '0.25rem' }}>Yearly Activity</h3>
       <p className="text-muted text-sm mb-4">Total hours focused per calendar year.</p>
       <ResponsiveContainer width="100%" height="80%">

@@ -6,7 +6,7 @@ export default function MonthlyActivityChart({ data }) {
   const chartData = getMonthlyActivity(data);
 
   return (
-    <div className="card w-full animate-slide-up" style={{ height: '350px' }}>
+    <div className="card w-full animate-slide-up" style={{ height: '250px' }}>
       <h3 style={{ marginBottom: '0.25rem' }}>Monthly Trends</h3>
       <p className="text-muted text-sm mb-4">Total hours focused per month over time.</p>
       <ResponsiveContainer width="100%" height="80%">

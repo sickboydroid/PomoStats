@@ -19,9 +19,9 @@ export default function CoolFacts({ data }) {
       
       {/* Group: Streaks and Totals */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="card flex items-center gap-4">
-          <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '1rem', borderRadius: '50%', color: '#ef4444' }}>
-            <Flame size={24} />
+        <div className="card flex items-center gap-3">
+          <div style={{ color: '#ef4444' }}>
+            <Flame size={20} />
           </div>
           <div>
             <div className="text-muted text-sm uppercase tracking-wider mb-1">Longest Streak</div>
@@ -29,9 +29,9 @@ export default function CoolFacts({ data }) {
           </div>
         </div>
 
-        <div className="card flex items-center gap-4">
-          <div style={{ background: 'rgba(0, 240, 255, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-cyan)' }}>
-            <CalendarDays size={24} />
+        <div className="card flex items-center gap-3">
+          <div style={{ color: 'var(--accent-cyan)' }}>
+            <CalendarDays size={20} />
           </div>
           <div>
             <div className="text-muted text-sm uppercase tracking-wider mb-1">Active Days</div>
@@ -39,9 +39,9 @@ export default function CoolFacts({ data }) {
           </div>
         </div>
 
-        <div className="card flex items-center gap-4">
-          <div style={{ background: 'rgba(168, 162, 158, 0.1)', padding: '1rem', borderRadius: '50%', color: '#a8a29e' }}>
-            <Hash size={24} />
+        <div className="card flex items-center gap-3">
+          <div style={{ color: '#a8a29e' }}>
+            <Hash size={20} />
           </div>
           <div>
             <div className="text-muted text-sm uppercase tracking-wider mb-1">Total Pomodoros</div>
@@ -52,9 +52,9 @@ export default function CoolFacts({ data }) {
 
       {/* Group: Averages */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-        <div className="card flex items-center gap-4">
-          <div style={{ background: 'rgba(245, 158, 11, 0.1)', padding: '1rem', borderRadius: '50%', color: '#f59e0b' }}>
-            <Clock size={24} />
+        <div className="card flex items-center gap-3">
+          <div style={{ color: '#f59e0b' }}>
+            <Clock size={20} />
           </div>
           <div>
             <div className="text-muted text-sm uppercase tracking-wider mb-1">Avg / Month</div>
@@ -62,9 +62,9 @@ export default function CoolFacts({ data }) {
           </div>
         </div>
 
-        <div className="card flex items-center gap-4">
-          <div style={{ background: 'rgba(139, 92, 246, 0.1)', padding: '1rem', borderRadius: '50%', color: '#8b5cf6' }}>
-            <Target size={24} />
+        <div className="card flex items-center gap-3">
+          <div style={{ color: '#8b5cf6' }}>
+            <Target size={20} />
           </div>
           <div>
             <div className="text-muted text-sm uppercase tracking-wider mb-1">Avg / Year</div>
@@ -75,9 +75,9 @@ export default function CoolFacts({ data }) {
 
       {/* Group: Personal Bests */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-        <div className="card flex items-center gap-4">
-          <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '1rem', borderRadius: '50%', color: '#10b981' }}>
-            <Trophy size={24} />
+        <div className="card flex items-center gap-3">
+          <div style={{ color: '#10b981' }}>
+            <Trophy size={20} />
           </div>
           <div>
             <div className="text-muted text-sm uppercase tracking-wider mb-1">Best Day</div>
@@ -86,9 +86,9 @@ export default function CoolFacts({ data }) {
           </div>
         </div>
 
-        <div className="card flex items-center gap-4">
-          <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '1rem', borderRadius: '50%', color: '#3b82f6' }}>
-            <Calendar size={24} />
+        <div className="card flex items-center gap-3">
+          <div style={{ color: '#3b82f6' }}>
+            <Calendar size={20} />
           </div>
           <div>
             <div className="text-muted text-sm uppercase tracking-wider mb-1">Best Week</div>
@@ -97,9 +97,9 @@ export default function CoolFacts({ data }) {
           </div>
         </div>
 
-        <div className="card flex items-center gap-4">
-          <div style={{ background: 'rgba(236, 72, 153, 0.1)', padding: '1rem', borderRadius: '50%', color: '#ec4899' }}>
-            <Star size={24} />
+        <div className="card flex items-center gap-3">
+          <div style={{ color: '#ec4899' }}>
+            <Star size={20} />
           </div>
           <div>
             <div className="text-muted text-sm uppercase tracking-wider mb-1">Best Month</div>
@@ -108,9 +108,9 @@ export default function CoolFacts({ data }) {
           </div>
         </div>
 
-        <div className="card flex items-center gap-4">
-          <div style={{ background: 'rgba(139, 92, 246, 0.1)', padding: '1rem', borderRadius: '50%', color: '#8b5cf6' }}>
-            <Target size={24} />
+        <div className="card flex items-center gap-3">
+          <div style={{ color: '#8b5cf6' }}>
+            <Target size={20} />
           </div>
           <div>
             <div className="text-muted text-sm uppercase tracking-wider mb-1">Best Year</div>

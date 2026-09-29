@@ -167,46 +167,39 @@ export function getCoolFacts(data) {
   };
 }
 
-export function getMovingAverage(data, windowDays = 7) {
+export function getWeeklyActivity(data) {
+  if (!data || data.length === 0) return [];
+  const weeklyTotals = {};
+  
+  data.forEach(item => {
+    const d = new Date(item.created);
+    if (!isNaN(d.getTime())) {
+      // Get ISO week string to group by Monday-Sunday calendar week
+      const dCopy = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      const dayNum = dCopy.getUTCDay() || 7;
+      dCopy.setUTCDate(dCopy.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(dCopy.getUTCFullYear(),0,1));
+      const weekNo = Math.ceil((((dCopy - yearStart) / 86400000) + 1)/7);
+      const weekStr = `${dCopy.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+      
+      if (!weeklyTotals[weekStr]) weeklyTotals[weekStr] = 0;
+      weeklyTotals[weekStr] += item.minutes || 0;
+    }
+  });
+
+  return Object.keys(weeklyTotals).sort().map(weekKey => ({
+    name: weekKey,
+    totalHours: parseFloat((weeklyTotals[weekKey] / 60).toFixed(2))
+  }));
+}
+
+export function getDailyActivity(data) {
   if (!data || data.length === 0) return [];
   const dailyMap = getDailyActivityMap(data);
-  const dates = Object.keys(dailyMap).sort();
-  
-  if (dates.length === 0) return [];
-
-  // Fill in missing dates to have a continuous timeline
-  const firstDate = new Date(dates[0]);
-  const lastDate = new Date(dates[dates.length - 1]);
-  const continuousMap = {};
-  
-  for (let d = new Date(firstDate); d <= lastDate; d.setDate(d.getDate() + 1)) {
-    const key = d.toISOString().split('T')[0];
-    continuousMap[key] = dailyMap[key] || 0;
-  }
-  const continuousDates = Object.keys(continuousMap).sort();
-  const result = [];
-
-  for (let i = 0; i < continuousDates.length; i++) {
-    let sumMinutes = 0;
-    let count = 0;
-    // Calculate trailing window average
-    for (let j = Math.max(0, i - windowDays + 1); j <= i; j++) {
-      sumMinutes += continuousMap[continuousDates[j]];
-      count++;
-    }
-    const avgMinutes = sumMinutes / count;
-    
-    // Only push if the date actually has activity, or every N days to keep chart clean
-    if (dailyMap[continuousDates[i]] !== undefined) {
-      result.push({
-        date: continuousDates[i],
-        avgHours: parseFloat((avgMinutes / 60).toFixed(2)),
-        actualHours: parseFloat((continuousMap[continuousDates[i]] / 60).toFixed(2))
-      });
-    }
-  }
-
-  return result;
+  return Object.keys(dailyMap).sort().map(dateStr => ({
+    date: dateStr,
+    actualHours: parseFloat((dailyMap[dateStr] / 60).toFixed(2))
+  }));
 }
 
 export function getHourlyActivity(data) {
@@ -214,7 +207,11 @@ export function getHourlyActivity(data) {
 
   const hourlyMap = Array.from({ length: 24 }, () => 0);
   const dailyMap = getDailyActivityMap(data);
-  const totalDays = Object.keys(dailyMap).length;
+  // Count ONLY days that had actual focus minutes > 0
+  let activeDaysCount = 0;
+  for (const mins of Object.values(dailyMap)) {
+    if (mins > 0) activeDaysCount++;
+  }
 
   data.forEach(item => {
     const d = new Date(item.created);
@@ -224,8 +221,7 @@ export function getHourlyActivity(data) {
   });
 
   return hourlyMap.map((totalMinutes, i) => {
-    const avgMin = totalDays > 0 ? parseFloat((totalMinutes / totalDays).toFixed(1)) : 0;
-    // Format hour nicely (e.g., "12 AM", "1 PM")
+    const avgMin = activeDaysCount > 0 ? parseFloat((totalMinutes / activeDaysCount).toFixed(1)) : 0;
     const ampm = i >= 12 ? 'PM' : 'AM';
     const hr = (i % 12) === 0 ? 12 : (i % 12);
     return {

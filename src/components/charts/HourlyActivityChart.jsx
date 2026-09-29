@@ -6,7 +6,7 @@ export default function HourlyActivityChart({ data }) {
   const chartData = getHourlyActivity(data);
 
   return (
-    <div className="card w-full animate-slide-up" style={{ height: '350px' }}>
+    <div className="card w-full animate-slide-up" style={{ height: '250px' }}>
       <h3 style={{ marginBottom: '0.25rem' }}>Active Hours</h3>
       <p className="text-muted text-sm mb-4">Average minutes focused per hour across all active days.</p>
       <ResponsiveContainer width="100%" height="80%">

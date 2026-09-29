@@ -4,7 +4,8 @@ import ActivityHeatmap from './charts/ActivityHeatmap';
 import WeekdayAveragesChart from './charts/WeekdayAveragesChart';
 import MonthlyActivityChart from './charts/MonthlyActivityChart';
 import YearlyActivityChart from './charts/YearlyActivityChart';
-import MovingAverageChart from './charts/MovingAverageChart';
+import DailyActivityChart from './charts/DailyActivityChart';
+import WeeklyActivityChart from './charts/WeeklyActivityChart';
 import HourlyActivityChart from './charts/HourlyActivityChart';
 import CoolFacts from './charts/CoolFacts';
 import { FileJson, FileSpreadsheet, Upload } from 'lucide-react';
@@ -71,7 +72,10 @@ export default function DashboardView({ data, onImport }) {
       {/* Group: Trends */}
       <div>
         <h3 className="text-muted uppercase tracking-wider mb-2 text-sm" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>Trends</h3>
-        <MovingAverageChart data={data} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-4">
+          <DailyActivityChart data={data} />
+          <WeeklyActivityChart data={data} />
+        </div>
       </div>
 
       {/* Group: Detailed Breakdowns */}
