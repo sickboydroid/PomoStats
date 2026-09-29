@@ -2,7 +2,7 @@ export async function fetchPomofocusData(authorization, cookie, onProgress) {
   let pageNum = 0;
   let allData = [];
   let hasMore = true;
-  const BATCH_SIZE = 5;
+  const BATCH_SIZE = 10;
 
   const fetchPage = async (page) => {
     const baseUrl = import.meta.env.DEV ? '' : 'https://pomofocus.io';

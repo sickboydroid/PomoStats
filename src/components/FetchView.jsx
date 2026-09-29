@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { fetchPomofocusData } from '../services/api';
-import { DownloadCloud, Play, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { DownloadCloud, Play, AlertTriangle, CheckCircle, Clock, X } from 'lucide-react';
 
-export default function FetchView({ onDataFetched }) {
+export default function FetchView({ onDataFetched, onClose }) {
   const [authorization, setAuthorization] = useState('');
   const [cookie, setCookie] = useState('');
   const [lastUsed, setLastUsed] = useState(null);
@@ -46,6 +46,10 @@ export default function FetchView({ onDataFetched }) {
       });
       setSuccessCount(data.length);
       onDataFetched(data);
+      // Auto close modal after brief pause on success
+      setTimeout(() => {
+        if (onClose) onClose();
+      }, 1200);
     } catch (err) {
       const errorDetails = err instanceof Error 
         ? `${err.name}: ${err.message}\n${err.stack || ''}` 
@@ -57,9 +61,15 @@ export default function FetchView({ onDataFetched }) {
   };
 
   return (
-    <div className="card animate-slide-up" style={{ maxWidth: '600px', margin: '0 auto' }}>
-      <h2 className="flex items-center gap-2">
-        <DownloadCloud className="text-cyan-400" size={24} style={{ color: 'var(--accent-cyan)' }} /> 
+    <div>
+      {onClose && (
+        <button className="modal-close-btn" onClick={onClose} aria-label="Close modal">
+          <X size={20} />
+        </button>
+      )}
+
+      <h2 className="flex items-center gap-2 mb-2" style={{ fontSize: '1.25rem' }}>
+        <DownloadCloud style={{ color: 'var(--accent-cyan)' }} size={22} /> 
         Fetch Data from Pomofocus
       </h2>
       <p className="text-muted text-sm mb-4">
@@ -67,46 +77,48 @@ export default function FetchView({ onDataFetched }) {
       </p>
 
       {lastUsed && (
-        <div className="flex items-center gap-2 mb-4 text-sm" style={{ color: 'var(--accent-cyan)' }}>
-          <Clock size={16} />
+        <div className="flex items-center gap-2 mb-4 text-xs" style={{ color: 'var(--accent-cyan)', background: 'var(--accent-cyan-dim)', padding: '0.4rem 0.75rem', borderRadius: '6px' }}>
+          <Clock size={14} />
           <span>Credentials last used: {lastUsed}</span>
         </div>
       )}
 
-      <form onSubmit={handleFetch} className="flex-col gap-4">
+      <form onSubmit={handleFetch} className="flex-col gap-3">
         <div>
-          <label className="text-sm font-semibold mb-2 block">Authorization Header</label>
+          <label className="text-xs font-semibold uppercase tracking-wider text-muted mb-1 block">Authorization Header</label>
           <input 
             type="text" 
             placeholder="eyJhbGciOiJIUzI1..." 
             value={authorization}
             onChange={(e) => setAuthorization(e.target.value)}
             disabled={isFetching}
+            style={{ fontSize: '0.875rem' }}
           />
         </div>
 
         <div>
-          <label className="text-sm font-semibold mb-2 block">Cookie Header</label>
+          <label className="text-xs font-semibold uppercase tracking-wider text-muted mb-1 block">Cookie Header</label>
           <input 
             type="text" 
             placeholder="access_token=eyJhbGciOi..." 
             value={cookie}
             onChange={(e) => setCookie(e.target.value)}
             disabled={isFetching}
+            style={{ fontSize: '0.875rem' }}
           />
         </div>
 
         {error && (
-          <div className="flex gap-2 mb-4" style={{ color: '#ef4444', background: 'rgba(239, 68, 68, 0.1)', padding: '0.75rem', borderRadius: '8px', alignItems: 'flex-start' }}>
+          <div className="flex gap-2 mb-3" style={{ color: '#ef4444', background: 'rgba(239, 68, 68, 0.1)', padding: '0.75rem', borderRadius: '8px', alignItems: 'flex-start' }}>
             <AlertTriangle size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
-            <span className="text-sm" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontFamily: 'monospace' }}>{error}</span>
+            <span className="text-xs" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontFamily: 'monospace' }}>{error}</span>
           </div>
         )}
 
         {isFetching && (
-          <div className="mb-4">
-            <div className="flex justify-between text-sm mb-2">
-              <span className="text-cyan-400" style={{ color: 'var(--accent-cyan)' }}>Fetching...</span>
+          <div className="mb-3">
+            <div className="flex justify-between text-xs mb-1">
+              <span style={{ color: 'var(--accent-cyan)' }}>Fetching...</span>
               <span>Pages Fetched: {progress}</span>
             </div>
             <div style={{ width: '100%', height: '4px', background: 'var(--border-color)', borderRadius: '2px', overflow: 'hidden' }}>
@@ -116,16 +128,16 @@ export default function FetchView({ onDataFetched }) {
         )}
 
         {successCount > 0 && !isFetching && !error && (
-          <div className="flex items-center gap-2 mb-4" style={{ color: '#10b981', background: 'rgba(16, 185, 129, 0.1)', padding: '0.75rem', borderRadius: '8px' }}>
+          <div className="flex items-center gap-2 mb-3" style={{ color: '#10b981', background: 'rgba(16, 185, 129, 0.1)', padding: '0.75rem', borderRadius: '8px' }}>
             <CheckCircle size={18} />
             <span className="text-sm">Successfully fetched {successCount} records!</span>
           </div>
         )}
 
-        <button type="submit" disabled={isFetching} className="w-full mt-4">
+        <button type="submit" disabled={isFetching} className="w-full mt-2" style={{ padding: '0.6em' }}>
           {isFetching ? 'Fetching...' : (
             <>
-              <Play size={18} /> Start Fetching
+              <Play size={16} /> Start Fetching
             </>
           )}
         </button>
@@ -133,3 +145,4 @@ export default function FetchView({ onDataFetched }) {
     </div>
   );
 }
+

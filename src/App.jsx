@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import FetchView from './components/FetchView';
 import DashboardView from './components/DashboardView';
-import { Activity, DownloadCloud } from 'lucide-react';
+import { DownloadCloud, Upload, FileJson, FileSpreadsheet } from 'lucide-react';
+import { exportToJson, exportToCsv } from './utils/exportUtils';
 import logoImage from './assets/logo.jpg';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
   const [data, setData] = useState([]);
+  const [showFetchModal, setShowFetchModal] = useState(false);
 
   // Load from local storage on mount
   useEffect(() => {
@@ -26,7 +27,6 @@ function App() {
   }, [data]);
 
   const handleDataFetched = (fetchedData) => {
-    // Merge new data with old data, avoiding duplicates based on _id
     const mergedData = [...data];
     fetchedData.forEach(item => {
       if (!mergedData.find(d => d._id === item._id)) {
@@ -34,48 +34,88 @@ function App() {
       }
     });
     setData(mergedData);
-    setActiveTab('dashboard');
   };
 
-  const handleDataImport = (importedData) => {
-    setData(importedData);
+  const handleDataImport = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const importedData = JSON.parse(event.target.result);
+        if (Array.isArray(importedData)) {
+          setData(importedData);
+        } else {
+          alert('Invalid JSON format. Expected an array of records.');
+        }
+      } catch (err) {
+        alert('Failed to parse JSON file.');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const triggerImportPicker = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = handleDataImport;
+    input.click();
   };
 
   return (
     <div className="container">
       {/* Header */}
-      <header className="flex justify-between items-center mb-4 pb-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
+      <header className="flex justify-between items-center mb-6 pb-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
         <div className="flex items-center gap-2">
-          <img src={logoImage} alt="PomoStats Logo" style={{ height: '32px', objectFit: 'contain' }} />
+          <img src={logoImage} alt="PomoStats Logo" style={{ height: '36px', objectFit: 'contain' }} />
         </div>
         
-        {/* Navigation Tabs */}
-        <div className="flex gap-2">
-          <button 
-            className={activeTab === 'dashboard' ? '' : 'outline'}
-            onClick={() => setActiveTab('dashboard')}
-          >
-            <Activity size={18} /> Dashboard
+        {/* Action Controls Toolbar */}
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          <button onClick={() => setShowFetchModal(true)}>
+            <DownloadCloud size={16} /> Fetch Data
           </button>
-          <button 
-            className={activeTab === 'fetch' ? '' : 'outline'}
-            onClick={() => setActiveTab('fetch')}
-          >
-            <DownloadCloud size={18} /> Fetch Data
+          
+          <label className="button outline" style={{ cursor: 'pointer' }}>
+            <Upload size={16} /> Import Data
+            <input type="file" accept=".json" style={{ display: 'none' }} onChange={handleDataImport} />
+          </label>
+
+          <button className="outline" onClick={() => exportToJson(data)} disabled={!data || data.length === 0}>
+            <FileJson size={16} /> Export JSON
+          </button>
+
+          <button className="outline" onClick={() => exportToCsv(data)} disabled={!data || data.length === 0}>
+            <FileSpreadsheet size={16} /> Export CSV
           </button>
         </div>
       </header>
 
       {/* Main Content Area */}
       <main>
-        {activeTab === 'dashboard' ? (
-          <DashboardView data={data} onImport={handleDataImport} />
-        ) : (
-          <FetchView onDataFetched={handleDataFetched} />
-        )}
+        <DashboardView 
+          data={data} 
+          onImportClick={triggerImportPicker} 
+          onFetchClick={() => setShowFetchModal(true)} 
+        />
       </main>
+
+      {/* Fetch Data Dialog / Modal */}
+      {showFetchModal && (
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowFetchModal(false); }}>
+          <div className="modal-content">
+            <FetchView 
+              onDataFetched={handleDataFetched} 
+              onClose={() => setShowFetchModal(false)} 
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 export default App;
+
