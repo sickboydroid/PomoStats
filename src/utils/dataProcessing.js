@@ -187,10 +187,22 @@ export function getWeeklyActivity(data) {
     }
   });
 
-  return Object.keys(weeklyTotals).sort().map(weekKey => ({
-    name: weekKey,
-    totalHours: parseFloat((weeklyTotals[weekKey] / 60).toFixed(2))
-  }));
+  return Object.keys(weeklyTotals).sort().map(weekKey => {
+    const [yearStr, weekStr] = weekKey.split('-W');
+    const year = parseInt(yearStr, 10);
+    const week = parseInt(weekStr, 10);
+    
+    // Get approx Thursday of the week to determine the month
+    const d = new Date(year, 0, 1);
+    const days = (week - 1) * 7;
+    d.setDate(d.getDate() + days - (d.getDay() || 7) + 1 + 3);
+    const month = d.toLocaleString('default', { month: 'short' });
+    
+    return {
+      name: `${month} W${week}`,
+      totalHours: parseFloat((weeklyTotals[weekKey] / 60).toFixed(2))
+    };
+  });
 }
 
 export function getDailyActivity(data) {

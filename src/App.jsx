@@ -1,12 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import FetchView from './components/FetchView';
 import DashboardView from './components/DashboardView';
+import DateRangeSelector from './components/DateRangeSelector';
 import { DownloadCloud, Upload, FileJson, FileSpreadsheet } from 'lucide-react';
 import { exportToJson, exportToCsv } from './utils/exportUtils';
 
 function App() {
   const [data, setData] = useState([]);
   const [showFetchModal, setShowFetchModal] = useState(false);
+  const [dateRange, setDateRange] = useState(() => {
+    const saved = localStorage.getItem('pomostats_dateRange');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (err) {}
+    }
+    return { type: 'all', start: '', end: '' };
+  });
 
   // Load from local storage on mount
   useEffect(() => {
@@ -24,6 +34,25 @@ function App() {
       localStorage.setItem('pomofocusData', JSON.stringify(data));
     }
   }, [data]);
+
+  // Save date range to local storage
+  useEffect(() => {
+    localStorage.setItem('pomostats_dateRange', JSON.stringify(dateRange));
+  }, [dateRange]);
+
+  const filteredData = useMemo(() => {
+    if (dateRange.type === 'all' || !dateRange.start || !dateRange.end) {
+      return data;
+    }
+    const start = new Date(dateRange.start);
+    const end = new Date(dateRange.end);
+    end.setHours(23, 59, 59, 999);
+    
+    return data.filter(item => {
+      const date = new Date(item.created);
+      return date >= start && date <= end;
+    });
+  }, [data, dateRange]);
 
   const handleDataFetched = (fetchedData) => {
     const mergedData = [...data];
@@ -94,8 +123,11 @@ function App() {
 
       {/* Main Content Area */}
       <main>
+        {data && data.length > 0 && (
+          <DateRangeSelector dateRange={dateRange} setDateRange={setDateRange} />
+        )}
         <DashboardView 
-          data={data} 
+          data={filteredData} 
           onImportClick={triggerImportPicker} 
           onFetchClick={() => setShowFetchModal(true)} 
         />

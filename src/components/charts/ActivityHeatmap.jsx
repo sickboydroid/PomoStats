@@ -58,8 +58,12 @@ export default function ActivityHeatmap({ data }) {
     }
   }, [data]);
 
+  const [hoveredCell, setHoveredCell] = React.useState(null);
+
   const combinedLabels = [];
   let currentOffset = 0;
+  let lastPrintedMonth = -1;
+  let lastPrintedYear = -1;
   
   // Calculate gaps and label positions
   const renderWeeks = weeks.map((week, wIdx) => {
@@ -68,31 +72,22 @@ export default function ActivityHeatmap({ data }) {
     const currentYear = thurs.getFullYear();
 
     let marginRight = 4; // Default gap between weeks
-    let isYearChange = false;
-    let isMonthChange = false;
 
     if (wIdx < weeks.length - 1) {
       const nextThurs = weeks[wIdx + 1][3].date;
       if (nextThurs.getFullYear() !== currentYear) {
         marginRight = 24; // Medium-large gap for year
-        isYearChange = true;
       } else if (nextThurs.getMonth() !== currentMonth) {
         marginRight = 12; // Medium gap for month
-        isMonthChange = true;
       }
     }
 
-    // Check if this week starts a new month (or is week 0)
-    if (wIdx === 0 || isMonthChange || isYearChange) {
-      const firstDayOfMonth = week.find(d => d.date.getDate() <= 7);
-      const targetDate = firstDayOfMonth ? firstDayOfMonth.date : thurs;
-      
-      const monthStr = targetDate.toLocaleString('default', { month: 'short' });
-      const yearStr = targetDate.getFullYear();
-      const isJan = targetDate.getMonth() === 0;
+    if (currentMonth !== lastPrintedMonth || currentYear !== lastPrintedYear) {
+      const monthStr = thurs.toLocaleString('default', { month: 'short' });
+      const yearStr = currentYear.toString();
       
       let labelContent;
-      if (isJan || wIdx === 0) {
+      if (currentMonth === 0 || lastPrintedMonth === -1) {
         labelContent = (
           <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>
             {monthStr} <span style={{ opacity: 0.6, fontSize: '11px', fontWeight: 'normal', marginLeft: '2px' }}>({yearStr})</span>
@@ -106,6 +101,9 @@ export default function ActivityHeatmap({ data }) {
         offset: currentOffset,
         node: labelContent
       });
+      
+      lastPrintedMonth = currentMonth;
+      lastPrintedYear = currentYear;
     }
 
     const weekWidth = 12 + marginRight; // 12px width + margin
@@ -114,13 +112,9 @@ export default function ActivityHeatmap({ data }) {
     return (
       <div key={wIdx} style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginRight: `${marginRight}px` }}>
         {week.map((day, dIdx) => {
-          const isZero = day.minutes === 0;
-          const tooltip = isZero ? `${day.dateKey}: No activity` : `${day.dateKey}: ${(day.minutes / 60).toFixed(1)} hrs`;
-          
           return (
             <div
               key={dIdx}
-              title={tooltip}
               style={{
                 width: '12px',
                 height: '12px',
@@ -133,11 +127,19 @@ export default function ActivityHeatmap({ data }) {
                 e.target.style.transform = 'scale(1.4)';
                 e.target.style.zIndex = 10;
                 e.target.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
+                const rect = e.target.getBoundingClientRect();
+                setHoveredCell({
+                  date: day.dateKey,
+                  minutes: day.minutes,
+                  x: rect.x + rect.width / 2,
+                  y: rect.y
+                });
               }}
               onMouseLeave={(e) => {
                 e.target.style.transform = 'scale(1)';
                 e.target.style.zIndex = 1;
                 e.target.style.boxShadow = 'none';
+                setHoveredCell(null);
               }}
             />
           );
@@ -185,6 +187,28 @@ export default function ActivityHeatmap({ data }) {
           {renderWeeks}
         </div>
       </div>
+
+      {hoveredCell && (
+        <div style={{
+          position: 'fixed',
+          top: hoveredCell.y - 12,
+          left: hoveredCell.x,
+          transform: 'translate(-50%, -100%)',
+          backgroundColor: 'var(--bg-card-hover)',
+          border: '1px solid var(--border-color)',
+          padding: '6px 12px',
+          borderRadius: '6px',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+          pointerEvents: 'none',
+          zIndex: 9999,
+          fontSize: '12px',
+          textAlign: 'center',
+          minWidth: '90px'
+        }}>
+          <div style={{ color: 'var(--text-muted)', marginBottom: '2px' }}>{hoveredCell.date}</div>
+          <div style={{ fontWeight: 600 }}>{hoveredCell.minutes === 0 ? 'No activity' : `${(hoveredCell.minutes / 60).toFixed(1)} hrs`}</div>
+        </div>
+      )}
     </div>
   );
 }
