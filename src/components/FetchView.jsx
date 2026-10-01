@@ -51,15 +51,33 @@ export default function FetchView({ onDataFetched, onClose }) {
         if (onClose) onClose();
       }, 1200);
     } catch (err) {
-      if (err instanceof TypeError && err.message === 'Failed to fetch') {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      
+      if (errorMessage === 'Failed to fetch' || errorMessage.includes('/corsdemo') || errorMessage.includes('403')) {
         setError(
-          "CORS Error: To fetch data directly from Pomofocus on this site, please temporarily enable the proxy by visiting https://cors-anywhere.herokuapp.com/corsdemo, click 'Request temporary access', and then try fetching again."
+          <div>
+            <div className="mb-2 font-semibold">Proxy Access Required</div>
+            <p className="text-sm mb-3">
+              Because this app is hosted on GitHub Pages (a static host), it requires a secure proxy to fetch data directly from Pomofocus without being blocked by your browser.
+            </p>
+            <p className="text-sm mb-3">
+              Please click the button below to visit the proxy server, click <strong>"Request temporary access"</strong>, and then come back here to fetch your data.
+            </p>
+            <a 
+              href="https://cors-anywhere.herokuapp.com/corsdemo" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2"
+            >
+              Unlock Proxy Access
+            </a>
+          </div>
         );
       } else {
         const errorDetails = err instanceof Error 
-          ? `${err.name}: ${err.message}\n${err.stack || ''}` 
+          ? `${err.name}: ${err.message}` 
           : typeof err === 'object' ? JSON.stringify(err, null, 2) : String(err);
-        setError(errorDetails);
+        setError(<div className="whitespace-pre-wrap">{errorDetails}</div>);
       }
     } finally {
       setIsFetching(false);
