@@ -67,10 +67,82 @@ export default function FetchView({ onDataFetched, onClose }) {
               href="https://cors-anywhere.herokuapp.com/corsdemo" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2"
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 w-full mb-3"
             >
               Unlock Proxy Access
             </a>
+            
+            <div className="text-xs text-muted mb-2 font-semibold">ALTERNATIVE: RUN LOCALLY</div>
+            <p className="text-sm mb-3">
+              If you prefer not to use a proxy, you can download a custom Python script pre-filled with your credentials to download your data locally, and then import it here!
+            </p>
+            <button 
+              type="button"
+              onClick={() => {
+                const scriptContent = `import urllib.request
+import json
+import ssl
+import time
+
+AUTHORIZATION = "${authorization || 'YOUR_AUTH_TOKEN'}"
+COOKIE = "${cookie || 'YOUR_COOKIE'}"
+
+def fetch_data():
+    all_items = []
+    page = 0
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    
+    print("Fetching data from Pomofocus...")
+    while True:
+        url = f"https://pomofocus.io/api/daily-report-items?pageNum={page}"
+        req = urllib.request.Request(url, headers={
+            'Authorization': AUTHORIZATION,
+            'Cookie': COOKIE
+        })
+        try:
+            with urllib.request.urlopen(req, context=ctx) as response:
+                if response.status != 200:
+                    print(f"Failed with status: {response.status}")
+                    break
+                data = json.loads(response.read().decode())
+                items = data.get('items', [])
+                if not items:
+                    break
+                all_items.extend(items)
+                print(f"Fetched page {page} ({len(items)} items)")
+                page += 1
+                time.sleep(0.5)
+        except Exception as e:
+            print(f"Error fetching page {page}: {e}")
+            break
+            
+    if all_items:
+        with open('pomostats.json', 'w') as f:
+            json.dump(all_items, f)
+        print(f"\\nSuccessfully saved {len(all_items)} items to pomostats.json!")
+        print("You can now import this file into PomoStats!")
+    else:
+        print("No data fetched.")
+
+if __name__ == "__main__":
+    fetch_data()
+`;
+                const blob = new Blob([scriptContent], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'fetch_pomofocus.py';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+              }}
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-secondary text-secondary-foreground hover:bg-secondary/90 h-9 px-4 py-2 w-full"
+            >
+              Download Python Script
+            </button>
           </div>
         );
       } else {
