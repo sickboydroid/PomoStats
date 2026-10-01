@@ -16,7 +16,9 @@
 - **Turbo Fetching**: Fetches your data using 10 concurrent threads for maximum speed.
 - **Import / Export**: Easily backup your history to JSON or CSV and load it back anytime without an internet connection.
 
-## 🛠️ Setup & Run
+## 🛠️ Setup & Run (Recommended)
+Because this app is a purely static site when hosted on GitHub Pages, your browser may block requests to Pomofocus due to **CORS (Cross-Origin Resource Sharing)** restrictions. For the smoothest, zero-configuration experience, it is highly recommended to run this app locally where a built-in proxy bypasses these errors natively!
+
 To run this visualizer locally, it's easy peasy tomato squeezy:
 
 ```bash
@@ -25,3 +27,11 @@ npm run dev
 ```
 
 Then, open the provided localhost URL in your browser. From the dashboard, simply click the **Fetch Data** button and provide your Pomofocus authorization token to load your stats!
+
+## 🐍 Python Fallback Script
+If you prefer to use the live GitHub Pages site but run into CORS blocking issues, there's a seamless fallback mechanism built right into the app!
+When a fetch fails on the live site, the app will automatically generate a **custom Python script (`fetch_pomofocus.py`)** pre-filled with your authentication credentials. 
+1. Download the script when prompted.
+2. Run it locally via your terminal: `python fetch_pomofocus.py`
+3. It will download all your history into a `pomostats.json` file.
+4. Go to the dashboard, click **Import Data**, and select the downloaded file to visualize your stats!
